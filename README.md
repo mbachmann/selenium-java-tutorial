@@ -22,6 +22,9 @@ The solution per chapter is in the corresponding branch.
 
 * Identify an input field using: ID, Name, CSS Selector, XPath
 * Create a test class that compares all methods
+* Test a form (e.g., contact form)
+* Use Select for dropdowns
+* Check validation error messages with getText()
 
 ## Chapter 4: Synchronization
 
@@ -36,22 +39,24 @@ The solution per chapter is in the corresponding branch.
 * Use PageFactory for Initialization
 * Reusable Methods: searchFor(String query)
 
-## Chapter 6: Forms & Events
+## Chapter 6: Advanced Techniques 
 
 * Test a form (e.g., contact form)
 * Use Select for dropdowns
 * Check validation error messages with getText()
-
-## Chapter 7: Alerts, Frames, Popups
-
 * Test accepting a JavaScript alert
 * Switch to an iFrame and interact with a button
 * Open a new tab/window and check content
+* JavaScriptExecutor
 
-## Chapter 8: Error Analysis & Logging
+## Chapter 7: Error Analysis & Logging
 
 * Implement screenshots in case of errors
 * Simulate an error and analyze the screenshot + log
+
+## Chapter 8: Test Execution with Maven and Junit
+
+* use surefire for text execution
 
 ## Chapter 9: Best Practices
 
