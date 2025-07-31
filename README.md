@@ -62,14 +62,20 @@ The solution per chapter is in the corresponding branch.
 
 ## Chapter 9: Best Practices
 
-Outsource WebDriver generation
-Use properties files
-Reusable utility methods
-Use @ParameterizedTest with CSV data
+* Outsource WebDriver generation
+* Use properties files
+* Reusable utility methods
+* Use @ParameterizedTest with CSV data
 
 ## Chapter 10: Selenium Grid & Parallelization
 
-Start Selenium Grid via Docker
-Connect to a Chrome node via RemoteWebDriver
-Run three tests in parallel using JUnit5
+* Start Selenium Grid via Docker
+* Connect to a Chrome node via RemoteWebDriver
+* Run three tests in parallel using JUnit5
+
+
+
+
+
+
 
