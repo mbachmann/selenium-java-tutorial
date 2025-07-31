@@ -1,4 +1,4 @@
-package ch1;
+package ch01;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.*;
