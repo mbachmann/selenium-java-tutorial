@@ -19,7 +19,7 @@ The solution per chapter is in the corresponding branch.
 * Test a form (e.g., contact form)
 * Use Select for dropdowns
 * Check validation error messages with getText()
-* 
+*
 ## Chapter 3: WebElement Interaction
 
 * Write a test that enters a search term into DuckDuckGo

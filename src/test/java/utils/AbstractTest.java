@@ -1,4 +1,4 @@
-package tests;
+package utils;
 
 import java.time.Duration;
 
@@ -14,16 +14,14 @@ public class AbstractTest {
 	protected WebDriver driver;
 	protected WebDriverWait wait;
 
-
-
-	void setup(String url) {
+	protected void setup(String url) {
 		driver = SeleniumConfiguration.getLocalChromeDriver();
 		driver.get(url);
 		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 	}
 
 	@AfterEach
-	void teardown() {
+	protected void teardown() {
 		if (driver != null) {
 			driver.quit();
 		}

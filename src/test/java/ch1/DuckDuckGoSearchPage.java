@@ -1,10 +1,7 @@
-package pages;
-
-import java.time.Duration;
+package ch1;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.*;
-import org.openqa.selenium.support.ui.*;
 
 import utils.HasLogger;
 

@@ -1,12 +1,12 @@
-package tests;
+package ch1;
 
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
 
-import pages.*;
+import utils.AbstractTest;
 
-public class DuckDuckGoTest extends AbstractTest{
+public class DuckDuckGoTest extends AbstractTest {
 
 	private DuckDuckGoSearchPage page;
 
