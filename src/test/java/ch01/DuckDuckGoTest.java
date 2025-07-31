@@ -1,4 +1,4 @@
-package ch1;
+package ch01;
 
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
