@@ -17,14 +17,15 @@ The solution per chapter is in the corresponding branch.
 * Identify an input field using: ID, Name, CSS Selector, XPath
 * Create a test class that compares all methods
 * Test a form (e.g., contact form)
-* Use Select for dropdowns
-* Check validation error messages with getText()
-*
+
+
 ## Chapter 3: WebElement Interaction
 
 * Write a test that enters a search term into DuckDuckGo
 * Click on the first search result
 * Use findElement() and sendKeys()
+* Use Select for dropdowns
+* Check validation error messages with getText()
 
 
 ## Chapter 4: Synchronization
