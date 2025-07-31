@@ -5,7 +5,7 @@ import org.openqa.selenium.*;
 
 import utils.AbstractTest;
 
-public class LocalisationTest extends AbstractTest {
+public class LoginPageTest extends AbstractTest {
 
 	@BeforeEach
 	void setup() {
