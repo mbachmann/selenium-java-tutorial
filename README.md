@@ -12,19 +12,20 @@ The solution per chapter is in the corresponding branch.
 * Create a SeleniumConfiguration and a AbstractTest class
 * Write a test that opens www.duckduckgo.com
 
-## Chapter 2: WebElement Interaction
-
-* Write a test that enters a search term into Google
-* Click on the first search result
-* Use findElement() and sendKeys()
-
-## Chapter 3: Locator Strategies
+## Chapter 2: Locator Strategies
 
 * Identify an input field using: ID, Name, CSS Selector, XPath
 * Create a test class that compares all methods
 * Test a form (e.g., contact form)
 * Use Select for dropdowns
 * Check validation error messages with getText()
+*
+## Chapter 3: WebElement Interaction
+
+* Write a test that enters a search term into DuckDuckGo
+* Click on the first search result
+* Use findElement() and sendKeys()
+
 
 ## Chapter 4: Synchronization
 
@@ -39,7 +40,7 @@ The solution per chapter is in the corresponding branch.
 * Use PageFactory for Initialization
 * Reusable Methods: searchFor(String query)
 
-## Chapter 6: Advanced Techniques 
+## Chapter 6: Advanced Techniques
 
 * Test a form (e.g., contact form)
 * Use Select for dropdowns
