@@ -16,6 +16,14 @@ public class LoginInteractionTest extends AbstractTest implements HasLogger {
 	void loginTest() {
 		driver.findElement(By.id("username")).sendKeys("tomsmith");
 		driver.findElement(By.id("password")).sendKeys("SuperSecretPassword!");
+
+		getLogger().info(driver.findElement(By.id("username")).getAttribute("value")); 		// is correct
+		getLogger().info(driver.findElement(By.id("username")).getDomAttribute("value"));		// is not correct (null)
+		getLogger().info(driver.findElement(By.id("username")).getDomProperty("value"));		// is correct
+		getLogger().info(driver.findElement(By.id("username")).getText());							// is not correct
+
+		getLogger().info(driver.findElement(By.id("password")).getAttribute("value")); 		// is correct
+
 		driver.findElement(By.cssSelector("button.radius")).click();
 
 		WebElement flashMessage = driver.findElement(By.id("flash"));

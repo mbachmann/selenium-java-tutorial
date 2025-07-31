@@ -1,5 +1,7 @@
 package ch03;
 
+import java.util.List;
+
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -18,10 +20,15 @@ public class HoverActionTest extends AbstractTest implements HasLogger {
 
 	@Test
 	void hoverTest() {
-		WebElement avatar = driver.findElement(By.cssSelector(".figure:first-child"));
-		actions.moveToElement(avatar).perform();
+		List<WebElement> figures = driver.findElements(By.cssSelector(".figure"));
 
-		WebElement caption = driver.findElement(By.cssSelector(".figure:first-child .figcaption h5"));
-		Assertions.assertTrue(caption.isDisplayed());
+		if (!figures.isEmpty()) {
+			WebElement avatar = figures.getFirst();
+			actions.moveToElement(avatar).perform();// Erstes Element
+
+			WebElement caption = avatar.findElement(By.className("figcaption"));
+			Assertions.assertTrue(caption.isDisplayed());
+			Assertions.assertTrue(caption.getText().contains("name: user1"));
+		}
 	}
 }

@@ -20,6 +20,14 @@ public class AbstractTest {
 		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 	}
 
+	protected void wait(int millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@AfterEach
 	protected void teardown() {
 		if (driver != null) {
