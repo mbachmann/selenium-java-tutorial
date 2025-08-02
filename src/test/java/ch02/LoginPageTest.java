@@ -5,7 +5,7 @@ import org.openqa.selenium.*;
 
 import utils.TestBase;
 
-public class LoginPageTestBase extends TestBase {
+public class LoginPageTest extends TestBase {
 
 	@BeforeEach
 	void setup() {
