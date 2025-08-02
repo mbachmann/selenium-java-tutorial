@@ -6,7 +6,7 @@ import org.openqa.selenium.interactions.Actions;
 
 import utils.*;
 
-public class DragAndDropActionTestBase extends TestBase implements HasLogger {
+public class DragAndDropActionTest extends TestBase implements HasLogger {
 
 	Actions actions;
 

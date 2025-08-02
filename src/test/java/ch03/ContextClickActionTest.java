@@ -6,7 +6,7 @@ import org.openqa.selenium.interactions.Actions;
 
 import utils.*;
 
-public class ContextClickActionTestBase extends TestBase implements HasLogger {
+public class ContextClickActionTest extends TestBase implements HasLogger {
 
 	Actions actions;
 

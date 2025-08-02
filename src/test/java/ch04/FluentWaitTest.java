@@ -8,7 +8,7 @@ import org.openqa.selenium.support.ui.*;
 
 import utils.*;
 
-public class FluentWaitTestBase extends TestBase implements HasLogger {
+public class FluentWaitTest extends TestBase implements HasLogger {
 	@BeforeEach
 	void setup() {
 		super.setup("https://the-internet.herokuapp.com/dynamic_loading/1");

@@ -8,7 +8,7 @@ import org.openqa.selenium.interactions.Actions;
 
 import utils.*;
 
-public class HoverActionTestBase extends TestBase implements HasLogger {
+public class HoverActionTest extends TestBase implements HasLogger {
 
 	Actions actions;
 

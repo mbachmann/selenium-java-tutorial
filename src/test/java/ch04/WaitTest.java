@@ -6,7 +6,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import utils.*;
 
-public class WaitTest extends AbstractTest implements HasLogger {
+public class WaitTest extends TestBase implements HasLogger {
 	@BeforeEach
 	void setup() {
 		super.setup("https://the-internet.herokuapp.com/dynamic_loading/1");

@@ -6,7 +6,7 @@ import org.openqa.selenium.support.ui.*;
 
 import utils.TestBase;
 
-public class DuckDuckGoTestBase extends TestBase {
+public class DuckDuckGoTest extends TestBase {
 
 	private DuckDuckGoSearchPage page;
 

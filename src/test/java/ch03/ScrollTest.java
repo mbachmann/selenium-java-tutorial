@@ -5,7 +5,7 @@ import org.openqa.selenium.*;
 
 import utils.*;
 
-public class ScrollTestBase extends TestBase implements HasLogger {
+public class ScrollTest extends TestBase implements HasLogger {
 
 	@BeforeEach
 	void setup() {
