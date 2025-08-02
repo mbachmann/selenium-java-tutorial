@@ -4,9 +4,9 @@ import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
 
-import utils.AbstractTest;
+import utils.TestBase;
 
-public class DuckDuckGoTest extends AbstractTest {
+public class DuckDuckGoTestBase extends TestBase {
 
 	private DuckDuckGoSearchPage page;
 

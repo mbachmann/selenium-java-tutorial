@@ -5,7 +5,7 @@ import org.openqa.selenium.*;
 
 import utils.*;
 
-public class WikipediaLocatorTest extends AbstractTest implements HasLogger {
+public class WikipediaLocatorTestBase extends TestBase implements HasLogger {
 
 	@BeforeEach
 	void setup() {

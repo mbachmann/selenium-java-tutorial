@@ -5,7 +5,7 @@ import org.openqa.selenium.*;
 
 import utils.*;
 
-public class AlertTest extends AbstractTest implements HasLogger {
+public class AlertTestBase extends TestBase implements HasLogger {
 
 	@BeforeEach
 	void setup() {

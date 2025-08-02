@@ -5,7 +5,7 @@ import org.openqa.selenium.*;
 
 import utils.*;
 
-public class IFrameTest  extends AbstractTest implements HasLogger {
+public class IFrameTestBase extends TestBase implements HasLogger {
 
 	@BeforeEach
 	void setup() {
