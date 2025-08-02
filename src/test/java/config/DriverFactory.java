@@ -9,9 +9,9 @@ import org.openqa.selenium.logging.*;
 import org.slf4j.*;
 
 
-public class SeleniumConfiguration {
+public class DriverFactory {
 
-	private static final Logger logger = LoggerFactory.getLogger(SeleniumConfiguration.class);
+	private static final Logger logger = LoggerFactory.getLogger(DriverFactory.class);
 	public static WebDriver driver;
 
 	public static WebDriver getLocalChromeDriver() {

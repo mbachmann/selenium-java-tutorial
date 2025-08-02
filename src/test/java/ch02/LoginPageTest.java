@@ -3,9 +3,9 @@ package ch02;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 
-import utils.AbstractTest;
+import utils.BaseTest;
 
-public class LoginPageTest extends AbstractTest {
+public class LoginPageTest extends BaseTest {
 
 	@BeforeEach
 	void setup() {
