@@ -5,7 +5,7 @@ import org.openqa.selenium.*;
 
 import utils.*;
 
-public class LocatorOptionsTest extends AbstractTest implements HasLogger {
+public class LocatorOptionsTest extends BaseTest implements HasLogger {
 
 	@BeforeEach
 	void setup() {

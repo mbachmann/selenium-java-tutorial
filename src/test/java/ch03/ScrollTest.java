@@ -2,11 +2,10 @@ package ch03;
 
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
-import org.openqa.selenium.interactions.Actions;
 
 import utils.*;
 
-public class ScrollTest extends AbstractTest implements HasLogger {
+public class ScrollTest extends BaseTest implements HasLogger {
 
 	@BeforeEach
 	void setup() {

@@ -5,7 +5,7 @@ import org.openqa.selenium.*;
 
 import utils.*;
 
-public class LoginInteractionTest extends AbstractTest implements HasLogger {
+public class LoginInteractionTest extends BaseTest implements HasLogger {
 
 	@BeforeEach
 	void setup() {

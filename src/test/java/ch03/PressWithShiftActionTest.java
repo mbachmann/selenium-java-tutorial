@@ -6,7 +6,7 @@ import org.openqa.selenium.interactions.Actions;
 
 import utils.*;
 
-public class PressWithShiftActionTest extends AbstractTest implements HasLogger {
+public class PressWithShiftActionTest extends BaseTest implements HasLogger {
 
 	Actions actions;
 
