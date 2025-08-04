@@ -49,7 +49,7 @@ The solution per chapter is in the corresponding branch.
 * Reusable Methods
 
 
-## Chapter 6: Test dasta management and test data driven testing
+## Chapter 6: Test data management and test data driven testing
 
 * Use properties files
 * Reusable utility methods
