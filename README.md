@@ -12,11 +12,12 @@ The solution per chapter is in the corresponding branch.
 * Create a SeleniumConfiguration and a AbstractTest class
 * Write a test that opens www.duckduckgo.com
 
+
 ## Chapter 2: Locator Strategies
 
 * Identify an input field using: ID, Name, CSS Selector, XPath
 * Create a test class that compares all methods
-* Test a form (e.g., contact form)
+* Test a form (e.g., login form)
 
 
 ## Chapter 3: WebElement Interaction
@@ -24,26 +25,7 @@ The solution per chapter is in the corresponding branch.
 * Write a test that enters a search term into DuckDuckGo
 * Click on the first search result
 * Use findElement() and sendKeys()
-* Use Select for dropdowns
 * Check validation error messages with getText()
-
-
-## Chapter 4: Synchronization
-
-* Load a website with an intentionally delayed element
-* Write two tests:
-* Using Thread.sleep() (dirty)
-* Using WebDriverWait and ExpectedConditions (best practice)
-
-## Chapter 5: Page Object Model
-
-* Refactor your Google test into Page classes
-* Use PageFactory for Initialization
-* Reusable Methods: searchFor(String query)
-
-## Chapter 6: Advanced Techniques
-
-* Test a form (e.g., contact form)
 * Use Select for dropdowns
 * Check validation error messages with getText()
 * Test accepting a JavaScript alert
@@ -51,21 +33,44 @@ The solution per chapter is in the corresponding branch.
 * Open a new tab/window and check content
 * JavaScriptExecutor
 
-## Chapter 7: Error Analysis & Logging
+
+## Chapter 4: Synchronization
+
+* Load a website with an intentionally delayed element
+* Write two tests:
+* Using WebDriverWait and ExpectedConditions
+* Using FluentWait and ExpectedConditions 
+
+
+## Chapter 5: Page Object Model
+
+* Refactor your Login test into Page classes
+* Use PageFactory for Initialization
+* Reusable Methods
+
+
+## Chapter 6: Test dasta management and test data driven testing
+
+* Use properties files
+* Reusable utility methods
+* Use @ParameterizedTest with CSV data
+
+
+## Chapter 7: File up- and download, Error Analysis & Logging
 
 * Implement screenshots in case of errors
 * Simulate an error and analyze the screenshot + log
 
-## Chapter 8: Test Execution with Maven and Junit
+
+## Chapter 8: Test Execution with Maven and Junit, implement Reporting
 
 * use surefire for text execution
 
-## Chapter 9: Best Practices
 
-* Outsource WebDriver generation
-* Use properties files
-* Reusable utility methods
-* Use @ParameterizedTest with CSV data
+## Chapter 9: Assertions and Validation
+
+* Use different Assertion Methods
+
 
 ## Chapter 10: Selenium Grid & Parallelization
 
