@@ -1,4 +1,4 @@
-package ch03;
+package ch03.task10;
 
 import java.util.List;
 

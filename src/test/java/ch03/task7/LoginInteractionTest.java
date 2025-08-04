@@ -1,4 +1,4 @@
-package ch03;
+package ch03.task7;
 
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;

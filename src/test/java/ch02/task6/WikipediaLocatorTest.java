@@ -1,4 +1,4 @@
-package ch02;
+package ch02.task6;
 
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;

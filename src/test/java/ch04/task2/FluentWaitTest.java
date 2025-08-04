@@ -1,4 +1,4 @@
-package ch04;
+package ch04.task2;
 
 import java.time.Duration;
 
