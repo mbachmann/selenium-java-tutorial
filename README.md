@@ -58,6 +58,7 @@ The solution per chapter is in the corresponding branch.
 
 ## Chapter 7: File up- and download, Error Analysis & Logging
 
+* Test File up- and download
 * Implement screenshots in case of errors
 * Simulate an error and analyze the screenshot + log
 
