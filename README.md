@@ -4,6 +4,8 @@ https://github.com/mbachmann/selenium-java-tutorial
 
 The solution per chapter is in the corresponding branch.
 
+# Part 1
+
 ## Chapter 1: Introduction & Setup
 
 * Set up a Maven project with the latest Selenium version and Junit 5
@@ -33,39 +35,38 @@ The solution per chapter is in the corresponding branch.
 * Open a new tab/window and check content
 * JavaScriptExecutor
 
+# Part 2
 
 ## Chapter 4: Synchronization
 
 * Load a website with an intentionally delayed element
 * Write two tests:
-* Using WebDriverWait and ExpectedConditions
-* Using FluentWait and ExpectedConditions 
+* task01: Using WebDriverWait and ExpectedConditions
+* task02: Using FluentWait and ExpectedConditions 
 
 
 ## Chapter 5: Page Object Model
 
-* Refactor your Login test into Page classes
-* Use PageFactory for Initialization
-* Reusable Methods
+* task03: Refactor your Login test into LoginPage classes
+* task04: Refactor your Login test into LoginPage and BasePage classes
+* task05: Use PageFactory for Initialization with @FindBy
 
 
 ## Chapter 6: Test data management and test data driven testing
 
-* Use properties files
-* Reusable utility methods
-* Use @ParameterizedTest with CSV data
-
+* task06: Use csv file for @ParameterizedTest with @CsvFileSource
+* task07: Use data sample for @ParameterizedTest with @CsvSource
+* task08: use JavaFaker to produce test data
 
 ## Chapter 7: File up- and download, Error Analysis & Logging
 
-* Test File up- and download
-* Implement screenshots in case of errors
-* Simulate an error and analyze the screenshot + log
-
+* task09: Test File upload
+* task10: Test File download
+* task11: test screenshots in case of errors and simulate an error and analyze the screenshot + log
 
 ## Chapter 8: Test Execution with Maven and Junit, implement Reporting
 
-* use surefire for text execution
+* task12: use surefire for text execution
 
 
 ## Chapter 9: Assertions and Validation
