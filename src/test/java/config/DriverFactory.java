@@ -62,7 +62,10 @@ public class DriverFactory implements HasLogger {
 		if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Linux) {
 			chromeOptions.addArguments("--headless");
 		}
+
+		chromeOptions.addArguments("--remote-allow-origins=*");
 		chromeOptions.addArguments("--disable-gpu");
+		chromeOptions.addArguments("--no-sandbox");
 		chromeOptions.addArguments("--safebrowsing-disable-download-protection");
 		chromeOptions.addArguments("--safebrowsing-disable-extension-blacklist");
 		setDownloadOptions(chromeOptions);
