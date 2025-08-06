@@ -39,4 +39,16 @@ public final class OsCheck {
 		}
 		return detectedOS;
 	}
+
+	public static String getArchitecture() {
+		return System.getProperty("os.arch");
+	}
+
+	public static String getVersion() {
+		return System.getProperty("os.version");
+	}
+
+	public static String getName() {
+		return System.getProperty("os.name");
+	}
 }
