@@ -1,13 +1,19 @@
 package utils;
 
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.text.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.*;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.*;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -141,4 +147,66 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 		Allure.addAttachment("log", String.join("\n", logs));
 		eventMap.clear();
 	}
+
+	/**
+	 * Set the value of a WebElement using sendKeys() or JavaScript.
+
+	 * @param element input element
+	 * @param value the value to set
+	 */
+	protected void setValue(WebElement element, String value) {
+		try {
+			// First try to set the value using sendKeys)
+			element.clear();
+			element.sendKeys(value);
+
+			// check if the value was set correctly
+			if (!value.equals(element.getAttribute("value"))) {
+				throw new RuntimeException("sendKeys hat nicht den gewünschten Wert gesetzt.");
+			}
+
+		} catch (Exception e) {
+			// Fallback to JavaScript if sendKeys fails or does not set the value correctly
+			((JavascriptExecutor) this.driver).executeScript(
+					"arguments[0].value = arguments[1];" +
+							"arguments[0].dispatchEvent(new Event('input', { bubbles: true }));" +
+							"arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
+					element, value
+			);
+		}
+	}
+
+	/**
+	 * Paste text into a WebElement using the clipboard or JavaScript. Not pasting in headless mode.
+	 * Instead, it sets the value directly via JavaScript.
+	 *
+	 * @param driver the WebDriver instance
+	 * @param element the WebElement to paste text into
+	 * @param text the text to paste
+	 */
+	protected static void pasteText(WebDriver driver, WebElement element, String text) {
+
+		boolean headless = ((JavascriptExecutor) driver)
+				.executeScript("return navigator.userAgent.toLowerCase().includes('headless')") != null;
+		if (!headless) {
+			// copy Text in Clipboard
+			Toolkit.getDefaultToolkit().getSystemClipboard()
+					.setContents(new StringSelection(text), null);
+
+			// Focus to Element and paste
+			element.click();
+			if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Windows) {
+				element.sendKeys(Keys.CONTROL, "v"); // CTRL + V auf Windows
+			} else if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Linux) {
+				element.sendKeys(Keys.CONTROL, "v"); // CTRL + V auf Linux
+			} else if (OsCheck.getOperatingSystemType() == OsCheck.OSType.MacOS) {
+				element.sendKeys(Keys.COMMAND, "v"); // CMD + V auf macOS
+			}
+		} else {
+			// Headless- oder Fallback-Option: Set value directly via JavaScript
+			((JavascriptExecutor) driver).executeScript(
+					"arguments[0].value = arguments[1];", element, text);
+		}
+	}
 }
+
