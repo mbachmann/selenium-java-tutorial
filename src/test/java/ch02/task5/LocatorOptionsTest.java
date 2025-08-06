@@ -36,7 +36,7 @@ public class LocatorOptionsTest extends TestBase implements HasLogger {
 
 		// By.xpath
 		WebElement password = driver.findElement(By.xpath("//input[@type='password']"));
-		password.sendKeys("SuperSecretPassword!");
+		InputUtils.pasteText(driver, password, "SuperSecretPassword!");
 	}
 
 }
