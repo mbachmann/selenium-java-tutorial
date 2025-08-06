@@ -184,7 +184,7 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 	 * @param element the WebElement to paste text into
 	 * @param text the text to paste
 	 */
-	protected static void pasteText(WebDriver driver, WebElement element, String text) {
+	public static void pasteText(WebDriver driver, WebElement element, String text) {
 
 		boolean headless = ((JavascriptExecutor) driver)
 				.executeScript("return navigator.userAgent.toLowerCase().includes('headless')") != null;
