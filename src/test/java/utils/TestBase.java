@@ -127,25 +127,28 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 		MapAppender mapAppender = (MapAppender)root.getAppender("map");
 
-		Map<String, ILoggingEvent> eventMap = mapAppender.getEventMap();
-		eventMap.forEach((k, event) -> {
-			logEntries.add(mapAppender.createLogEntry(event));
-		});
+		if (mapAppender != null) {
+			Map<String, ILoggingEvent> eventMap = mapAppender.getEventMap();
+			eventMap.forEach((k, event) -> {
+				logEntries.add(mapAppender.createLogEntry(event));
+			});
 
-		List<String> logs = new ArrayList<>();
-		logEntries.forEach(entry -> {
-			if (entry.contains("[browser]")) {
-				if (entry.contains("\n") && entry.contains("\r")) {
-					entry = entry.replace("\r", "");
+			List<String> logs = new ArrayList<>();
+			logEntries.forEach(entry -> {
+				if (entry.contains("[browser]")) {
+					if (entry.contains("\n") && entry.contains("\r")) {
+						entry = entry.replace("\r", "");
+					}
+					logs.addAll(Arrays.asList(entry.split("\n")));
+				} else {
+					logs.add(entry); // + System.lineSeparator());
 				}
-				logs.addAll(Arrays.asList(entry.split("\n")));
-			} else {
-				logs.add(entry); // + System.lineSeparator());
-			}
-		});
-		logs.sort(String::compareTo);
-		Allure.addAttachment("log", String.join("\n", logs));
-		eventMap.clear();
+			});
+			logs.sort(String::compareTo);
+			Allure.addAttachment("log", String.join("\n", logs));
+			eventMap.clear();
+		}
+
 	}
 
 	/**
@@ -184,7 +187,7 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 	 * @param element the WebElement to paste text into
 	 * @param text the text to paste
 	 */
-	protected static void pasteText(WebDriver driver, WebElement element, String text) {
+	public static void pasteText(WebDriver driver, WebElement element, String text) {
 
 		boolean headless = ((JavascriptExecutor) driver)
 				.executeScript("return navigator.userAgent.toLowerCase().includes('headless')") != null;
