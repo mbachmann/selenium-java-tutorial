@@ -1,8 +1,10 @@
 package ch05.task3;
 
+import ch05.task4.BasePage;
 import org.openqa.selenium.*;
+import utils.TestBase;
 
-public class LoginPage {
+public class LoginPage  {
 	private final WebDriver driver;
 
 	private final By usernameField = By.id("username");
@@ -20,7 +22,9 @@ public class LoginPage {
 	}
 
 	public void setPassword(String password) {
-		driver.findElement(passwordField).sendKeys(password);
+		// sendkeys of ! on macos not working due to bug in selenium
+		WebElement pwd = driver.findElement(passwordField);
+		TestBase.setValue(driver, pwd,"SuperSecretPassword!");
 	}
 
 	public void clickLogin() {
