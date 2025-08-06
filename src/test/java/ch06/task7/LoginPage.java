@@ -2,6 +2,7 @@ package ch06.task7;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.*;
+import utils.TestBase;
 
 public class LoginPage {
 	private WebDriver driver;
@@ -28,7 +29,9 @@ public class LoginPage {
 
 	public void login(String user, String pass) {
 		usernameInput.sendKeys(user);
-		if (pass != null) passwordInput.sendKeys(pass);
+		if (pass != null)  {
+			TestBase.setValue(driver, passwordInput,"SuperSecretPassword!");
+		}
 		loginButton.click();
 	}
 

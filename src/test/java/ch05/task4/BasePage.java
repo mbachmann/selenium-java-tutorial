@@ -4,8 +4,9 @@ import java.time.Duration;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
+import utils.TestBase;
 
-public abstract class BasePage {
+public abstract class BasePage extends TestBase {
 	protected WebDriver driver;
 	protected WebDriverWait wait;
 
@@ -25,7 +26,7 @@ public abstract class BasePage {
 	protected void type(By locator, String text) {
 		WebElement element = waitForVisibility(locator);
 		element.clear();
-		element.sendKeys(text);
+		TestBase.setValue(driver, element, text);
 	}
 
 	protected String getText(By locator) {
