@@ -1,0 +1,34 @@
+package ch03.task7;
+
+import org.junit.jupiter.api.*;
+import org.openqa.selenium.*;
+
+import utils.*;
+
+public class LoginInteractionTest extends TestBase implements HasLogger {
+
+	@BeforeEach
+	void setup() {
+		super.setup("https://the-internet.herokuapp.com/login");
+	}
+
+	@Test
+	void loginTest() {
+		driver.findElement(By.id("username")).sendKeys("tomsmith");
+		driver.findElement(By.id("password")).sendKeys("SuperSecretPassword!");
+
+		getLogger().info(driver.findElement(By.id("username")).getAttribute("value")); 		// is correct
+		getLogger().info(driver.findElement(By.id("username")).getDomAttribute("value"));		// is not correct (null)
+		getLogger().info(driver.findElement(By.id("username")).getDomProperty("value"));		// is correct
+		getLogger().info(driver.findElement(By.id("username")).getText());							// is not correct
+
+		getLogger().info(driver.findElement(By.id("password")).getAttribute("value")); 		// is correct
+
+		driver.findElement(By.cssSelector("button.radius")).click();
+
+		WebElement flashMessage = driver.findElement(By.id("flash"));
+		Assertions.assertTrue(flashMessage.getText().contains("You logged into a secure area!"));
+		getLogger().info("Login successful: " + flashMessage.getText());
+	}
+
+}
