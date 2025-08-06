@@ -2,9 +2,10 @@ package ch05.task5;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.*;
+import utils.TestBase;
 
-public class LoginPage {
-	private WebDriver driver;
+public class LoginPage  {
+	private final WebDriver driver;
 
 	@FindBy(id = "username")
 	private WebElement usernameInput;
@@ -25,7 +26,7 @@ public class LoginPage {
 
 	public void login(String user, String pass) {
 		usernameInput.sendKeys(user);
-		passwordInput.sendKeys(pass);
+		TestBase.setValue(driver, passwordInput, pass);
 		loginButton.click();
 	}
 

@@ -154,7 +154,7 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 	 * @param element input element
 	 * @param value the value to set
 	 */
-	protected void setValue(WebElement element, String value) {
+	public static void setValue(WebDriver driver,  WebElement element, String value) {
 		try {
 			// First try to set the value using sendKeys)
 			element.clear();
@@ -167,7 +167,7 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 
 		} catch (Exception e) {
 			// Fallback to JavaScript if sendKeys fails or does not set the value correctly
-			((JavascriptExecutor) this.driver).executeScript(
+			((JavascriptExecutor) driver).executeScript(
 					"arguments[0].value = arguments[1];" +
 							"arguments[0].dispatchEvent(new Event('input', { bubbles: true }));" +
 							"arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
