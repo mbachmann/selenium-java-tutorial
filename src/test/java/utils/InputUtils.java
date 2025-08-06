@@ -15,6 +15,12 @@ public class InputUtils {
 
         // Focus to Element and paste
         element.click();
-        element.sendKeys(Keys.COMMAND, "v"); // CMD + V auf macOS
+        if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Windows) {
+            element.sendKeys(Keys.CONTROL, "v"); // CTRL + V auf Windows
+        } else if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Linux) {
+            element.sendKeys(Keys.CONTROL, "v"); // CTRL + V auf Linux
+        } else if (OsCheck.getOperatingSystemType() == OsCheck.OSType.MacOS) {
+            element.sendKeys(Keys.COMMAND, "v"); // CMD + V auf macOS
+        }
     }
 }
