@@ -4,7 +4,7 @@ https://github.com/mbachmann/selenium-java-tutorial
 
 The solution per chapter is in the corresponding branch.
 
-<img src="branches.png" alt="branches.png" style="width:200px;"/>
+<img src="branches.png" alt="branches.png" style="width:250px;"/>
 
 # Part 1
 
