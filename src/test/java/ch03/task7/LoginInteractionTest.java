@@ -22,7 +22,7 @@ public class LoginInteractionTest extends TestBase implements HasLogger {
 		// Copy password to clipboard
 		// sendkeys of ! on macos not working due to bug in selenium
 		WebElement pwd = driver.findElement(By.id("password"));
-		InputUtils.pasteText(driver, pwd, "SuperSecretPassword!");
+		setValue( pwd,"SuperSecretPassword!");
 
 		getLogger().info(driver.findElement(By.id("username")).getAttribute("value")); 		// is correct
 		getLogger().info(driver.findElement(By.id("username")).getDomAttribute("value"));		// is not correct (null)
