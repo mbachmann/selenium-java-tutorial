@@ -5,6 +5,9 @@ import org.openqa.selenium.*;
 
 import utils.*;
 
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+
 public class LoginInteractionTest extends TestBase implements HasLogger {
 
 	@BeforeEach
@@ -15,7 +18,11 @@ public class LoginInteractionTest extends TestBase implements HasLogger {
 	@Test
 	void loginTest() {
 		driver.findElement(By.id("username")).sendKeys("tomsmith");
-		driver.findElement(By.id("password")).sendKeys("SuperSecretPassword!");
+
+		// Copy password to clipboard
+		// sendkeys of ! on macos not working due to bug in selenium
+		WebElement pwd = driver.findElement(By.id("password"));
+		setValue( pwd,"SuperSecretPassword!");
 
 		getLogger().info(driver.findElement(By.id("username")).getAttribute("value")); 		// is correct
 		getLogger().info(driver.findElement(By.id("username")).getDomAttribute("value"));		// is not correct (null)
