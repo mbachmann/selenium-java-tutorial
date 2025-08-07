@@ -68,6 +68,11 @@ public class DriverFactory implements HasLogger {
 		chromeOptions.addArguments("--no-sandbox");
 		chromeOptions.addArguments("--safebrowsing-disable-download-protection");
 		chromeOptions.addArguments("--safebrowsing-disable-extension-blacklist");
+		String chromeUserDataDir = System.getProperty("SelChromeUserDataDir");
+		if (chromeUserDataDir != null) {
+			chromeOptions.addArguments("--user-data-dir=" + chromeUserDataDir);
+		}
+
 		setDownloadOptions(chromeOptions);
 		return chromeOptions;
 	}
