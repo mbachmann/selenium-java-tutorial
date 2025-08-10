@@ -73,7 +73,7 @@ public class DriverFactory implements HasLogger {
 			chromeOptions.addArguments("--user-data-dir=" + chromeUserDataDir);
 		}
 
-		setDownloadOptions(chromeOptions);
+		setChromeDownloadOptions(chromeOptions);
 		return chromeOptions;
 	}
 
@@ -83,7 +83,7 @@ public class DriverFactory implements HasLogger {
 		driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
 	}
 
-	private static void setDownloadOptions(ChromeOptions chromeOptions) {
+	private static void setChromeDownloadOptions(ChromeOptions chromeOptions) {
 		Map<String, Object> prefs = new HashMap<>();
 		prefs.put("download.default_directory", getDownloadDir());
 		prefs.put("download.prompt_for_download", false);

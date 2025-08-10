@@ -44,6 +44,18 @@ public final class OsCheck {
 		return System.getProperty("os.arch");
 	}
 
+	public static String getDriverFolder() {
+		if (detectedOS == null) getOperatingSystemType();
+		return switch (detectedOS) {
+			case OSType.Windows -> "win";
+			case OSType.MacOS -> "macos";
+			case OSType.Linux -> "linux";
+			default -> null;
+		};
+	}
+
+
+
 	public static String getVersion() {
 		return System.getProperty("os.version");
 	}
