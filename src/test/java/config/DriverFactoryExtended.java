@@ -127,6 +127,7 @@ public class DriverFactoryExtended implements HasLogger {
 
 		// create and start GeckoDriverService
 		GeckoDriverService service = new GeckoDriverService.Builder()
+				.usingDriverExecutable(new File(System.getProperty("webdriver.firefox.driver")))
 				.usingAnyFreePort()
 				.build();
 		try {

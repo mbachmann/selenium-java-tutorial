@@ -89,6 +89,57 @@ public class SafeActions {
         return this;
     }
 
+    /** 2) Expect a custom HTML menu (element) to become visible. */
+    public SafeActions contextClickExpectMenu(WebElement target, By menuLocator, Duration timeout) {
+        scroll(target);
+        try { actions.contextClick(target).perform(); } catch (Exception ignore) {}
+        if (!waitVisible(target, menuLocator, timeout)) {
+            log.debug("Menu not visible after Actions context click → JS contextmenu");
+            jsContextMenu(target);
+            if (!waitVisible(target, menuLocator, timeout)) log.warn("Menu still not visible after JS fallback.");
+        }
+        return this;
+    }
+
+    /** 3) Expect the URL to change after context click. */
+    public SafeActions contextClickExpectUrlChange(WebElement target, Duration timeout) {
+        String oldUrl = safeGetUrl();
+        scroll(target);
+        try { actions.contextClick(target).perform(); } catch (Exception ignore) {}
+        if (!waitTrue(() -> !safeGetUrl().equals(oldUrl), timeout)) {
+            log.debug("URL not changed after Actions context click → JS contextmenu");
+            jsContextMenu(target);
+            if (!waitTrue(() -> !safeGetUrl().equals(oldUrl), timeout)) log.warn("URL still unchanged after JS fallback.");
+        }
+        return this;
+    }
+
+    /** 4) Expect a specific element’s text to become (or equal) expected value. */
+    public SafeActions contextClickExpectElementText(WebElement target, WebElement textElement, String expected, Duration timeout) {
+        scroll(target);
+        try { actions.contextClick(target).perform(); } catch (Exception ignore) {}
+        if (!waitTrue(() -> expected.equals(textElement.getText()), timeout)) {
+            log.debug("Text not changed after Actions context click → JS contextmenu");
+            jsContextMenu(target);
+            if (!waitTrue(() -> expected.equals(textElement.getText()), timeout))
+                log.warn("Text not changed after JS fallback.");
+        }
+        return this;
+    }
+
+    /** 5) Fully custom: pass your own post-condition. */
+    public SafeActions contextClickCustom(WebElement target, Supplier<Boolean> postCondition, Duration timeout) {
+        scroll(target);
+        try { actions.contextClick(target).perform(); } catch (Exception ignore) {}
+        if (!waitTrue(postCondition, timeout)) {
+            log.debug("Custom post-condition not met → JS contextmenu");
+            jsContextMenu(target);
+            if (!waitTrue(postCondition, timeout)) log.warn("Custom post-condition still not met after JS fallback.");
+        }
+        return this;
+    }
+
+
     /* ===================== DRAG & DROP ===================== */
     public SafeActions dragAndDrop(WebElement source, WebElement target, Supplier<Boolean> postOk, Duration timeout) {
         scroll(source); scroll(target);
@@ -193,6 +244,11 @@ public class SafeActions {
                     "arguments[0].style.display='block'; arguments[0].style.opacity='1'; arguments[0].style.visibility='visible';", el);
         } catch (NoSuchElementException ignored) {}
     }
+
+    private String safeGetUrl() {
+        try { return driver.getCurrentUrl(); } catch (Exception e) { return ""; }
+    }
+
 
     /* Optional: helper to detect remote session (sometimes useful for branching) */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
