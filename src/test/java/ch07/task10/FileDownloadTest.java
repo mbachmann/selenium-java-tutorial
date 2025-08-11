@@ -10,7 +10,6 @@ import java.time.Duration;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 
-import config.DriverFactory;
 import utils.*;
 
 public class FileDownloadTest extends TestBase implements HasLogger {
@@ -22,9 +21,11 @@ public class FileDownloadTest extends TestBase implements HasLogger {
 
 	@Test
 	void downloadTest() {
-		driver.findElement(By.linkText("edu-test-upload.txt")).click();
 
-		File downloaded = new File(DriverFactory.getDownloadDir() + "/edu-test-upload.txt");
+		File downloaded = new File(DOWNLOAD_DIR + "/edu-test-upload.txt");
+		deleteFile(downloaded);
+
+		driver.findElement(By.linkText("edu-test-upload.txt")).click();
 
 		await()
 				.atMost(10, SECONDS)
@@ -33,9 +34,14 @@ public class FileDownloadTest extends TestBase implements HasLogger {
 
 		assertTrue(downloaded.exists());
 
+		deleteFile(downloaded);
+	}
+
+	private void deleteFile(File downloaded) {
 		if (downloaded.exists()) {
 			getLogger().info("Downloaded file exists: " + downloaded.getAbsoluteFile());
 			if (downloaded.delete()) getLogger().info("Successfully deleted " + downloaded.getName());
 		}
 	}
+
 }

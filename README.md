@@ -64,6 +64,8 @@ The solution per chapter is in the corresponding branch.
 ## Chapter 8: Test Execution with Maven and Junit, implement Reporting
 
 * **task12:** use surefire for text execution, use allure for test visualisation
+* mvn clean test
+* mvn allure:serve
 
 ## Chapter 9: Assertions and Validation
 
@@ -74,10 +76,26 @@ The solution per chapter is in the corresponding branch.
 * Start Selenium Grid via Docker
 * Connect to a Chrome node via RemoteWebDriver
 * Run three tests in parallel using JUnit5
+* docker compose up -d
+* Grid UI http://localhost:4444
+* mvn clean test -Dbrowser=firefox -DremoteUrl=http://localhost:4444/wd/hub
+* mvn clean test -Dbrowser=chrome
 
 
 
+## Error on MacOS
 
+If you get an error like this:
+
+```java.lang.IllegalStateException: The driver executable does not exist: /Users/mbachmann/Downloads/chromedriver
+    NoSuchDriver Unable to obtain: chromedriver, error chromedriver must be executable: src/test/resources/drivers/macos/chromedriver-138
+```
+
+Make sure that the chromedriver is executable:
+
+```bash
+chmod +x src/test/resources/drivers/macos/chromedriver-138
+```
 
 
 

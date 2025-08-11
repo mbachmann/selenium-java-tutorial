@@ -11,6 +11,10 @@
 		</encoder>
 	</appender>
 
+	<logger name="org.apache.logging.log4j" level="warn"/>
+
+	<logger name="config.DriverFactoryExtended" level="info"/>
+
 	<root level="debug">
 		<appender-ref ref="STDOUT"/>
 	</root>

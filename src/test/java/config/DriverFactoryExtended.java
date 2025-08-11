@@ -2,6 +2,8 @@ package config;
 
 import io.qameta.allure.Allure;
 import org.openqa.selenium.*;
+import org.openqa.selenium.bidi.log.LogLevel;
+import org.openqa.selenium.bidi.module.LogInspector;
 import org.openqa.selenium.chrome.*;
 import org.openqa.selenium.edge.*;
 import org.openqa.selenium.firefox.*;
@@ -14,6 +16,9 @@ import utils.HasLogger;
 import utils.OsCheck;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -39,9 +44,53 @@ public class DriverFactoryExtended implements HasLogger {
 		driver.set(driverInstance);
 	}
 
+	/**
+	 * Initializes the WebDriver based on system properties.
+	 * If no properties "browser" are set, defaults to Chrome.
+	 * If no remoteUrl is set, this method sets the WebDriver based on the browser type and initializes it locally with DriverService.
+	 *
+	 * @return WebDriver instance
+	 */
+	public static WebDriver initDriver() {
+		String browser = System.getProperty("browser", "chrome").toLowerCase();
+		String remoteUrl = System.getProperty("remoteUrl", "").trim();
+		logger.info("Initializing WebDriver with browser: [{}] and remote URL: [{}]", browser, remoteUrl);
 
+		URL url = getRemoteUrl(remoteUrl);
+		try {
+            return switch (browser) {
+                case "firefox" ->
+                        (remoteUrl.isEmpty()) ? getLocalFirefoxDriver() : getRemoteDriver(BrowserType.FIREFOX, url);
+                case "edge" -> (remoteUrl.isEmpty()) ? getLocalEdgeDriver() : getRemoteDriver(BrowserType.EDGE, url);
+                default -> (remoteUrl.isEmpty()) ? getLocalChromeDriver() : getRemoteDriver(BrowserType.CHROME, url);
+            };
+		} catch (Exception e) {
+			throw new RuntimeException("Error at creation of the WebDrivers: " + e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * Initializes the WebDriver with specified browser and remote URL.
+	 *
+	 * @param browser   the browser type (e.g., "chrome", "firefox", "edge")
+	 * @param remoteUrl the URL of the Selenium Grid or remote WebDriver server
+	 * @return WebDriver instance
+	 */
+	public static WebDriver initDriver(String browser, String remoteUrl) {
+		System.setProperty("browser", browser);
+		System.setProperty("remoteUrl", remoteUrl);
+		return initDriver();
+	}
+
+
+	/**
+	 * Initializes the WebDriver with Local ChromeDriver.
+	 * This method sets the ChromeDriver system property and starts the ChromeDriverService.
+	 * @return WebDriver instance
+	 */
 	public static WebDriver getLocalChromeDriver() {
 		setDriverProperty("chrome");
+		configureSeleniumLogging();
 		ChromeOptions options = getChromeOptions();
 
 		// create and start ChromeDriverService
@@ -65,11 +114,18 @@ public class DriverFactoryExtended implements HasLogger {
 		return configureDriver(getDriver());
 	}
 
+	/**
+	 * Initializes the WebDriver with Local FirefoxDriver.
+	 * This method sets the GeckoDriver system property and starts the GeckoDriverService.
+	 * @return WebDriver instance
+	 */
 	public static WebDriver getLocalFirefoxDriver() {
 		setDriverProperty("firefox");
+		configureSeleniumLogging();
+		logGeckoDriverVersion();
 		FirefoxOptions options = getFirefoxOptions();
 
-		// GeckoDriverService erstellen und starten
+		// create and start GeckoDriverService
 		GeckoDriverService service = new GeckoDriverService.Builder()
 				.usingAnyFreePort()
 				.build();
@@ -82,17 +138,31 @@ public class DriverFactoryExtended implements HasLogger {
 
 		if (driverService.get() != null && driverService.get() instanceof GeckoDriverService && driverService.get().isRunning()) {
 			setDriver(new FirefoxDriver((GeckoDriverService) driverService.get(), options));
+			try(LogInspector logInspector = new LogInspector(getDriver())) {
+				logInspector.onJavaScriptLog(logEntry -> {
+					log(logEntry.getLevel(), "[browser] " + logEntry.getText());
+				});
+
+			} catch (Exception e) {
+				logger.error("Error setting up Firefox log inspector", e);
+			}
 		} else {
 			setDriver(new FirefoxDriver(options));
 		}
 		return configureDriver(getDriver());
 	}
 
+	/**
+	 * Initializes the WebDriver with Local EdgeDriver.
+	 * This method sets the EdgeDriver system property and starts the EdgeDriverService.
+	 * @return WebDriver instance
+	 */
 	public static WebDriver getLocalEdgeDriver() {
 		setDriverProperty("edge");
+		configureSeleniumLogging();
 		EdgeOptions options = getEdgeOptions();
 
-		// EdgeDriverService erstellen und starten
+		// create and start EdgeDriverService
 		EdgeDriverService service = new EdgeDriverService.Builder()
 				.usingAnyFreePort()
 				.build();
@@ -111,7 +181,16 @@ public class DriverFactoryExtended implements HasLogger {
 		return configureDriver(getDriver());
 	}
 
+	/**
+	 * Initializes the WebDriver with Remote WebDriver using Selenium Grid.
+	 * This method sets the browser options based on the specified browser type and connects to the Selenium Grid URL.
+	 *
+	 * @param browser  the browser type (e.g., BrowserType.CHROME, BrowserType.FIREFOX, BrowserType.EDGE)
+	 * @param gridUrl  the URL of the Selenium Grid
+	 * @return WebDriver instance
+	 */
 	public static WebDriver getRemoteDriver(BrowserType browser, URL gridUrl) {
+		configureSeleniumLogging();
 		MutableCapabilities options = switch (browser) {
 			case CHROME -> getChromeOptions();
 			case FIREFOX -> getFirefoxOptions();
@@ -120,6 +199,7 @@ public class DriverFactoryExtended implements HasLogger {
 		};
 		try {
 			setDriver(new RemoteWebDriver(gridUrl, options));
+			((RemoteWebDriver) getDriver()).setFileDetector(new LocalFileDetector());
 		} catch (Exception e) {
 			throw new RuntimeException("Could not connect to Selenium Grid", e);
 		}
@@ -127,16 +207,21 @@ public class DriverFactoryExtended implements HasLogger {
 	}
 
 	private static WebDriver configureDriver(WebDriver driver) {
-		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(20));
-		driver.manage().timeouts().scriptTimeout(Duration.ofMinutes(2));
-		driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
+
+		getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(20));
+		getDriver().manage().timeouts().scriptTimeout(Duration.ofMinutes(2));
+		getDriver().manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
 		try {
-			Dimension windowSize = driver.manage().window().getSize();
+			Dimension windowSize = getDriver().manage().window().getSize();
 			logger.info("Window size: {}x{}", windowSize.width, windowSize.height);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
 		return driver;
+	}
+
+	private static void configureSeleniumLogging() {
+		java.util.logging.Logger.getLogger(org.openqa.selenium.bidi.Connection.class.getName()).setLevel(Level.WARNING);
 	}
 
 	private static ChromeOptions getChromeOptions() {
@@ -155,25 +240,40 @@ public class DriverFactoryExtended implements HasLogger {
 	}
 
 	private static void setChromeDownloadOptions(ChromeOptions chromeOptions) {
+
 		Map<String, Object> prefs = new HashMap<>();
-		prefs.put("download.default_directory", getDownloadDir());
+		prefs.put("download.default_directory", getBrowserDownloadDir());
 		prefs.put("download.prompt_for_download", false);
 		prefs.put("safebrowsing.enabled", true);
 		chromeOptions.setExperimentalOption("prefs", prefs);
 	}
 
 	public static String getDownloadDir() {
-		return System.getProperty("user.home") + File.separator + "downloads";
+		String remoteUrl = System.getProperty("remoteUrl", "").trim();
+		if (!remoteUrl.isEmpty()) {
+			return "downloads"; // Default download directory for Selenium Grid in docker compose
+		} else {
+			return System.getProperty("user.home") + File.separator + "downloads";
+		}
 	}
 
+	private static String getBrowserDownloadDir() {
+		String remoteUrl = System.getProperty("remoteUrl", "").trim();
+		if (!remoteUrl.isEmpty()) {
+			return "/home/seluser/Downloads"; // Default download directory for Selenium Grid in docker compose
+		} else {
+			return System.getProperty("user.home") + File.separator + "downloads";
+		}
+	}
 
 	private static FirefoxOptions getFirefoxOptions() {
 		FirefoxOptions options = new FirefoxOptions();
+		options.setLogLevel(FirefoxDriverLogLevel.WARN);
 		if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Linux) options.addArguments("-headless");
-		options.setCapability("moz:firefoxOptions", Map.of("args", Collections.emptyList()));
 		// Download prefs
 		options.addPreference("browser.download.folderList", 2);
-		options.addPreference("browser.download.dir", getDownloadDir());
+		options.setCapability("webSocketUrl", true);
+		options.addPreference("browser.download.dir", getBrowserDownloadDir());
 		options.addPreference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream,text/plain,application/pdf");
 		options.addPreference("pdfjs.disabled", true);
 		options.setAcceptInsecureCerts(true);
@@ -185,11 +285,22 @@ public class DriverFactoryExtended implements HasLogger {
 		options.addArguments("--disable-gpu", "--no-sandbox", "--remote-allow-origins=*");
 		options.setCapability(EdgeOptions.LOGGING_PREFS, getLoggingPreferences());
 		Map<String, Object> prefs = new HashMap<>();
-		prefs.put("download.default_directory", getDownloadDir());
+		prefs.put("download.default_directory", getBrowserDownloadDir());
 		prefs.put("download.prompt_for_download", false);
+		prefs.put("download.directory_upgrade", true);
 		prefs.put("safebrowsing.enabled", true);
 		options.setExperimentalOption("prefs", prefs);
 		return options;
+	}
+
+	private void configureChromeRemoteDownloadOptions(ChromeOptions chromeOptions) {
+		chromeOptions.setExperimentalOption("prefs", Map.of(
+				"download.default_directory", getBrowserDownloadDir(),
+				"download.prompt_for_download", false,
+				"download.directory_upgrade", true,
+				"safebrowsing.enabled", true
+		));
+
 	}
 
 	private static LoggingPreferences getLoggingPreferences() {
@@ -214,7 +325,7 @@ public class DriverFactoryExtended implements HasLogger {
 
 	public static void saveScreenshot(String name) {
 		attachPageScreenshotToAllure(name);
-		File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+		File screenshot = ((TakesScreenshot) getDriver()).getScreenshotAs(OutputType.FILE);
 		try {
 			File target = new File("target/screenshots/" + name + ".png");
 			Files.createDirectories(target.toPath().getParent());
@@ -225,8 +336,22 @@ public class DriverFactoryExtended implements HasLogger {
 	}
 
 	public static void attachPageScreenshotToAllure(String name) {
-		byte[] screenshotBytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+		byte[] screenshotBytes = ((TakesScreenshot) getDriver()).getScreenshotAs(OutputType.BYTES);
 		Allure.attachment(name, new ByteArrayInputStream(screenshotBytes));
+	}
+
+	public static void attachLogResponseToAllure(String responseName, String responseContent) {
+		Allure.addAttachment(responseName, "text/plain", responseContent);
+	}
+
+	public String getBrowserUserLanguage() {
+		JavascriptExecutor executor = (JavascriptExecutor) getDriver();
+		return (String) executor.executeScript("return window.navigator.language");
+	}
+
+	public String getUserAgent() {
+		JavascriptExecutor executor = (JavascriptExecutor) getDriver();
+		return (String) executor.executeScript("return window.navigator.userAgent");
 	}
 
 	public enum BrowserType {
@@ -254,6 +379,53 @@ public class DriverFactoryExtended implements HasLogger {
 				logger.warn("Error stopping driver service", e);
 			}
 			driverService.remove();
+			logger.info("Driver service stopped");
 		}
 	}
+
+	private static URL getRemoteUrl(String remoteUrl) {
+		if (remoteUrl == null || remoteUrl.isEmpty()) {
+			return null;
+		}
+		try {;
+			URI uri = new URI(remoteUrl);
+            return uri.toURL();
+		} catch (MalformedURLException | URISyntaxException e) {
+			throw new RuntimeException("Invalid remote URL: " + remoteUrl, e);
+		}
+    }
+
+	public static void log(LogLevel level, String message) {
+		switch (level) {
+			case DEBUG: logger.debug(message); break;
+			case INFO: logger.info(message); break;
+			case WARNING: logger.warn(message); break;
+			case ERROR: logger.error(message); break;
+		}
+	}
+
+	/**
+	 * Logs geckodriver version from the executable.
+	 */
+	private static void logGeckoDriverVersion() {
+		String geckoPath = System.getProperty("webdriver.firefox.driver");
+		if (geckoPath != null) {
+			try {
+				Process process = new ProcessBuilder(geckoPath, "--version")
+						.redirectErrorStream(true)
+						.start();
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+					String line;
+					while ((line = reader.readLine()) != null) {
+						logger.debug("[GeckoDriver] {}", line);
+					}
+				}
+			} catch (IOException e) {
+				logger.warn("Could not get geckodriver version: {}", e.getMessage());
+			}
+		} else {
+			logger.warn("webdriver.gecko.driver not set");
+		}
+	}
+
 }

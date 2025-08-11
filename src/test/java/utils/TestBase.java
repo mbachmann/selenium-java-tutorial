@@ -14,12 +14,15 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.logging.*;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
-import config.DriverFactory;
+import config.DriverFactoryExtended;
 import io.qameta.allure.Allure;
 
 @ExtendWith(TestBase.class)
@@ -28,9 +31,12 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 
 	protected WebDriver driver;
 	protected WebDriverWait wait;
+	protected String DOWNLOAD_DIR;
 
 	protected void setup(String url) {
-		driver = DriverFactory.getLocalChromeDriver();
+		// driver = DriverFactoryExtended.initDriver("chrome", "http://localhost:4444/wd/hub");
+		driver = DriverFactoryExtended.initDriver();
+		DOWNLOAD_DIR = DriverFactoryExtended.getDownloadDir();
 		driver.get(url);
 		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 	}
@@ -51,19 +57,24 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 		}
 	}
 
+	@AfterAll
+	protected void afterAll() {
+		// This method can be used for cleanup after all tests have run, if needed.
+		DriverFactoryExtended.quitDriver();
+	}
+
 	@Override
 	public void afterTestExecution(ExtensionContext context) throws Exception {
 		if (context.getExecutionException().isPresent()) {
 			String filename = getScreenshotFilename(context);
-			DriverFactory.saveScreenshot(filename);
+			DriverFactoryExtended.saveScreenshot(filename);
 		}
 	}
-
 
 	protected void saveScreenshot(TestInfo info)  {
 		if (info.getTestClass().isPresent() || info.getTestMethod().isPresent()) {
 			String filename = getScreenshotFilename(info.getTestClass().get().getSimpleName(), info.getTestMethod().get().getName());
-			DriverFactory.saveScreenshot(filename);
+			DriverFactoryExtended.saveScreenshot(filename);
 		}
 	}
 
@@ -86,34 +97,42 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 
 
 	public void printBrowserLogs() {
-
-		try {
-			Logs browserLogs = driver.manage().logs();
-			LogEntries logEntries = browserLogs.get(LogType.BROWSER);
-			StringBuilder logs = new StringBuilder();
-
-			// Log Levels LoggerFactory: error, warn, info, debug, trace,
-			// Log Levels from Browser: OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL
-			for (LogEntry entry : logEntries) {
-				logs.append(formatDate(entry.getTimestamp()))
-					.append(" ")
-					.append("[browser]")
-					.append(" ")
-					.append(entry.getLevel())
-					.append(" ")
-					.append(entry.getMessage());
-				logs.append(System.lineSeparator());
+		if (driver instanceof ChromeDriver || driver instanceof EdgeDriver || driver instanceof RemoteWebDriver) {
+			if (driver instanceof RemoteWebDriver) {
+				String browserName = ((RemoteWebDriver) driver).getCapabilities().getBrowserName().toLowerCase();
+				if (!(browserName.equalsIgnoreCase("chrome") || browserName.equalsIgnoreCase("edge"))) {
+					return;
+				}
 			}
+			try {
+				Logs browserLogs = driver.manage().logs();
+				LogEntries logEntries = browserLogs.get(LogType.BROWSER);
+				StringBuilder logs = new StringBuilder();
 
-			if (!logs.isEmpty()) {
-				getLogger().info("{}{}", System.lineSeparator(), logs);
+				// Log Levels LoggerFactory: error, warn, info, debug, trace,
+				// Log Levels from Browser: OFF, SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST, ALL
+				for (LogEntry entry : logEntries) {
+					logs.append(formatDate(entry.getTimestamp()))
+							.append(" ")
+							.append("[browser]")
+							.append(" ")
+							.append(entry.getLevel())
+							.append(" ")
+							.append(entry.getMessage());
+					logs.append(System.lineSeparator());
+				}
+
+				if (!logs.isEmpty()) {
+					getLogger().info("{}{}", System.lineSeparator(), logs);
+				}
+
+				addLogEntriesToAllureFromMapAppender();
+
+			} catch (Exception e) {
+				getLogger().error("Failed to get browser logs {}", String.valueOf(e));
 			}
-
-			addLogEntriesToAllureFromMapAppender();
-
-		} catch (Exception e) {
-			getLogger().error("Failed to get browser logs {}", String.valueOf(e));
 		}
+
 	}
 
 	private static String formatDate(long timestamp) {

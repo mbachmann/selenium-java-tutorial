@@ -6,14 +6,16 @@ import org.openqa.selenium.interactions.Actions;
 
 import utils.*;
 
+import java.time.Duration;
+
 public class DragAndDropActionTest extends TestBase implements HasLogger {
 
-	Actions actions;
+	SafeActions safe;
 
 	@BeforeEach
 	void setup() {
 		super.setup("https://the-internet.herokuapp.com/drag_and_drop");
-		actions = new Actions(driver);
+		safe = new SafeActions(driver);
 	}
 
 	@Test
@@ -21,9 +23,11 @@ public class DragAndDropActionTest extends TestBase implements HasLogger {
 		WebElement columnA = driver.findElement(By.id("column-a"));
 		WebElement columnB = driver.findElement(By.id("column-b"));
 
-		actions.dragAndDrop(columnA, columnB).perform();
+		safe.dragAndDrop(columnA, columnB,
+				() -> driver.findElement(By.cssSelector("#column-a header")).getText().equals("B"),
+				Duration.ofSeconds(3));
 
-		WebElement headerA = driver.findElement(By.cssSelector("#column-a header"));
-		Assertions.assertEquals("B", headerA.getText());
+		Assertions.assertEquals("B", driver.findElement(By.cssSelector("#column-a header")).getText());
+
 	}
 }

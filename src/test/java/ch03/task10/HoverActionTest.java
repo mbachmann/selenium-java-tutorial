@@ -6,29 +6,40 @@ import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 
+import org.openqa.selenium.remote.RemoteWebDriver;
 import utils.*;
+
+import org.junit.jupiter.api.*;
+import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
+import java.util.List;
 
 public class HoverActionTest extends TestBase implements HasLogger {
 
-	Actions actions;
+	SafeActions safe;
 
 	@BeforeEach
 	void setup() {
 		super.setup("https://the-internet.herokuapp.com/hovers");
-		actions = new Actions(driver);
+		safe = new SafeActions(driver);
 	}
 
 	@Test
 	void hoverTest() {
 		List<WebElement> figures = driver.findElements(By.cssSelector(".figure"));
+		Assertions.assertFalse(figures.isEmpty(), "No figures found on page");
 
-		if (!figures.isEmpty()) {
-			WebElement avatar = figures.getFirst();
-			actions.moveToElement(avatar).perform();// Erstes Element
+		WebElement avatar = figures.getFirst();
+		WebElement caption = avatar.findElement(By.className("figcaption"));
 
-			WebElement caption = avatar.findElement(By.className("figcaption"));
-			Assertions.assertTrue(caption.isDisplayed());
-			Assertions.assertTrue(caption.getText().contains("name: user1"));
-		}
+		safe.hover(avatar, By.className("figcaption"), Duration.ofSeconds(3));
+
+		Assertions.assertTrue(caption.isDisplayed(), "Caption should be visible after hover");
+		Assertions.assertTrue(caption.getText().contains("name: user1"), "Caption text mismatch");
 	}
 }

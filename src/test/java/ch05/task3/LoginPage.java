@@ -1,6 +1,5 @@
 package ch05.task3;
 
-import ch05.task4.BasePage;
 import org.openqa.selenium.*;
 import utils.TestBase;
 
