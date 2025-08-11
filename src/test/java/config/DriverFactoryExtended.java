@@ -141,7 +141,7 @@ public class DriverFactoryExtended implements HasLogger {
 			setDriver(new FirefoxDriver((GeckoDriverService) driverService.get(), options));
 			try(LogInspector logInspector = new LogInspector(getDriver())) {
 				logInspector.onJavaScriptLog(logEntry -> {
-					log(logEntry.getLevel(), "[browser] " + logEntry.getText());
+					log(logEntry.getLevel(), "[browser] " + normalizeLog(logEntry.getText()));
 				});
 
 			} catch (Exception e) {
@@ -270,8 +270,17 @@ public class DriverFactoryExtended implements HasLogger {
 	private static FirefoxOptions getFirefoxOptions() {
 		FirefoxOptions options = new FirefoxOptions();
 		options.setLogLevel(FirefoxDriverLogLevel.WARN);
+		options.addArguments("--disable-gpu", "--no-sandbox");
+		options.addPreference("network.cors_preflight.allow", true);
+		options.addPreference("network.cors_preflight.max_age", 3600);
+		options.setCapability("moz:firefoxOptions", Map.of(
+				"log", Map.of("level", "warn")
+		));
 		if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Linux) options.addArguments("-headless");
-		// Download prefs
+		if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Windows) {
+			findFirefoxBinaryOnWindows().ifPresent(options::setBinary);
+		}
+			// Download prefs
 		options.addPreference("browser.download.folderList", 2);
 		options.setCapability("webSocketUrl", true);
 		options.addPreference("browser.download.dir", getBrowserDownloadDir());
@@ -321,7 +330,7 @@ public class DriverFactoryExtended implements HasLogger {
 			default -> throw new IllegalArgumentException("Unknown browser: " + browser);
 		};
 		System.setProperty("webdriver." + browser + ".driver", path);
-		logger.info("Set {} driver: {}", browser, path);
+		logger.debug("Set {} driver: {}", browser, path);
 	}
 
 	public static void saveScreenshot(String name) {
@@ -427,6 +436,53 @@ public class DriverFactoryExtended implements HasLogger {
 		} else {
 			logger.warn("webdriver.gecko.driver not set");
 		}
+	}
+
+	private static Optional<String> findFirefoxBinaryOnWindows() {
+		// Common paths
+		String[] candidates = new String[] {
+				System.getenv("MOZ_FIREFOX_BINARY"),                                  // allow override via env
+				"C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+				"C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe"
+		};
+		for (String p : candidates) {
+			if (p != null && new java.io.File(p).isFile()) {
+				logger.debug("Found firefox binary on windows {}", p);
+				return Optional.of(p);
+			}
+		}
+		// Try PATH
+		try {
+			Process proc = new ProcessBuilder("where", "firefox").redirectErrorStream(true).start();
+			try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(proc.getInputStream()))) {
+				String line;
+				while ((line = r.readLine()) != null) {
+					if (line.toLowerCase().endsWith("firefox.exe") && new java.io.File(line).isFile()) {
+						logger.debug("Found firefox binary on windows {}", line);
+						return Optional.of(line.trim());
+					}
+				}
+			}
+		} catch (Exception ignored) {}
+		logger.warn("Could not find firefox binary on windows");
+		return Optional.empty();
+	}
+
+	private static String normalizeLog(String input) {
+		return input
+				.replace("ΓÇÿ", "'")  // fix single quote mojibake
+				.replace("ΓÇ£", "\"") // fix double quote mojibake
+				.replace("ΓÇ¥", "\"") // fix double quote mojibake
+				.replace("ΓÇô", "-")  // fix dash mojibake
+				.replace("ΓÇó", "•")  // bullet point
+				.replace("ΓÇ£", "\"")
+				.replace("“", "\"")
+				.replace("”", "\"")
+				.replace("’", "'")
+				.replace("–", "-")
+				.replace("…", "...")
+				.replace("\u00A0", " ") // non-breaking space to normal space
+				.trim();
 	}
 
 }
