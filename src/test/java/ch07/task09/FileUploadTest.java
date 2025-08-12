@@ -28,5 +28,4 @@ public class FileUploadTest extends TestBase implements HasLogger {
 		WebElement uploaded = driver.findElement(By.tagName("h3"));
 		assertEquals("File Uploaded!", uploaded.getText());
 	}
-
 }
