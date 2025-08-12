@@ -121,7 +121,6 @@ public class DriverFactoryExtended implements HasLogger {
 	 */
 	public static WebDriver getLocalFirefoxDriver() {
 		setDriverProperty("firefox");
-		configureSeleniumLogging();
 		logGeckoDriverVersion();
 		FirefoxOptions options = getFirefoxOptions();
 
@@ -139,7 +138,9 @@ public class DriverFactoryExtended implements HasLogger {
 
 		if (driverService.get() != null && driverService.get() instanceof GeckoDriverService && driverService.get().isRunning()) {
 			setDriver(new FirefoxDriver((GeckoDriverService) driverService.get(), options));
+			configureSeleniumLogging();
 			try(LogInspector logInspector = new LogInspector(getDriver())) {
+				// configureSeleniumLogging();
 				logInspector.onJavaScriptLog(logEntry -> {
 					log(logEntry.getLevel(), "[browser] " + normalizeLog(logEntry.getText()));
 				});
@@ -148,7 +149,9 @@ public class DriverFactoryExtended implements HasLogger {
 				logger.error("Error setting up Firefox log inspector", e);
 			}
 		} else {
-			setDriver(new FirefoxDriver(options));
+			if (getDriver() == null) {
+				setDriver(new FirefoxDriver(options));
+			}
 		}
 		return configureDriver(getDriver());
 	}
@@ -212,6 +215,7 @@ public class DriverFactoryExtended implements HasLogger {
 		getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(20));
 		getDriver().manage().timeouts().scriptTimeout(Duration.ofMinutes(2));
 		getDriver().manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
+
 		try {
 			Dimension windowSize = getDriver().manage().window().getSize();
 			logger.info("Window size: {}x{}", windowSize.width, windowSize.height);
@@ -232,11 +236,14 @@ public class DriverFactoryExtended implements HasLogger {
 		options.setCapability("goog:loggingPrefs", getLoggingPreferences());
 		options.addArguments("--safebrowsing-disable-download-protection");
 		options.addArguments("--safebrowsing-disable-extension-blacklist");
+		options.setAcceptInsecureCerts(true);
+		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		String chromeUserDataDir = System.getProperty("SelChromeUserDataDir");
 		if (chromeUserDataDir != null) {
 			options.addArguments("--user-data-dir=" + chromeUserDataDir);
 		}
 		setChromeDownloadOptions(options);
+		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
 		return options;
 	}
 
@@ -286,7 +293,9 @@ public class DriverFactoryExtended implements HasLogger {
 		options.addPreference("browser.download.dir", getBrowserDownloadDir());
 		options.addPreference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream,text/plain,application/pdf");
 		options.addPreference("pdfjs.disabled", true);
+		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
 		options.setAcceptInsecureCerts(true);
+		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		return options;
 	}
 
@@ -299,6 +308,9 @@ public class DriverFactoryExtended implements HasLogger {
 		prefs.put("download.prompt_for_download", false);
 		prefs.put("download.directory_upgrade", true);
 		prefs.put("safebrowsing.enabled", true);
+		options.setAcceptInsecureCerts(true);
+		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
 		options.setExperimentalOption("prefs", prefs);
 		return options;
 	}
@@ -378,7 +390,9 @@ public class DriverFactoryExtended implements HasLogger {
 			}
 			driver.remove();
 		}
+	}
 
+	public static void quitService() {
 		DriverService service = driverService.get();
 		if (service != null) {
 			try {
@@ -391,6 +405,11 @@ public class DriverFactoryExtended implements HasLogger {
 			driverService.remove();
 			logger.info("Driver service stopped");
 		}
+	}
+
+	public static void quitDriverAndService() {
+		quitDriver();
+		quitService();
 	}
 
 	private static URL getRemoteUrl(String remoteUrl) {
@@ -483,6 +502,18 @@ public class DriverFactoryExtended implements HasLogger {
 				.replace("…", "...")
 				.replace("\u00A0", " ") // non-breaking space to normal space
 				.trim();
+	}
+
+	private static Optional<Proxy> getProxyInformation(){
+		String proxyHost = System.getProperty("http.proxyHost", System.getenv("HTTP_PROXY_HOST"));
+		String proxyPort = System.getProperty("http.proxyPort", System.getenv("HTTP_PROXY_PORT"));
+		if (proxyHost != null && proxyPort != null) {
+			org.openqa.selenium.Proxy px = new org.openqa.selenium.Proxy();
+			String hp = proxyHost + ":" + proxyPort;
+			px.setHttpProxy(hp).setSslProxy(hp).setFtpProxy(hp);
+			return Optional.of(px);
+		}
+		return Optional.empty();
 	}
 
 }

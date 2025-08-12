@@ -10,10 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.*;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.logging.*;
@@ -35,10 +32,10 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 
 	protected void setup(String url) {
 		// driver = DriverFactoryExtended.initDriver("chrome", "http://localhost:4444/wd/hub");
-		// driver = DriverFactoryExtended.initDriver("firefox", "");
-		driver = DriverFactoryExtended.initDriver();
+		driver = DriverFactoryExtended.initDriver("firefox", "");
+		// driver = DriverFactoryExtended.initDriver();
 		DOWNLOAD_DIR = DriverFactoryExtended.getDownloadDir();
-		driver.get(url);
+		robustGet(driver, url);
 		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 	}
 
@@ -53,15 +50,13 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 	@AfterEach
 	protected void teardown() {
 		printBrowserLogs();
-		if (driver != null) {
-			driver.quit();
-		}
+		DriverFactoryExtended.quitDriver();
 	}
 
 	@AfterAll
 	protected void afterAll() {
 		// This method can be used for cleanup after all tests have run, if needed.
-		DriverFactoryExtended.quitDriver();
+		DriverFactoryExtended.quitDriverAndService();
 	}
 
 	@Override
@@ -230,6 +225,17 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 			((JavascriptExecutor) driver).executeScript(
 					"arguments[0].value = arguments[1];", element, text);
 		}
+	}
+
+	void robustGet(WebDriver driver, String url) {
+		try {
+			driver.get(url);
+		} catch (WebDriverException e) {
+			// one quick retry
+			try { driver.navigate().to(url); } catch (Exception ignored) {}
+		}
+		// small readiness check (doesn’t wait for all subresources)
+		((JavascriptExecutor) driver).executeScript("return document.readyState");
 	}
 }
 

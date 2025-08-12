@@ -26,7 +26,7 @@ services:
     volumes:
       - ./downloads:/home/seluser/Downloads
     deploy:
-      replicas: 2
+      replicas: 1
 
   firefox:
     image: selenium/node-firefox:4.34.0
@@ -41,7 +41,7 @@ services:
     volumes:
       - ./downloads:/home/seluser/Downloads
     deploy:
-      replicas: 2
+      replicas: 1
 
   edge:
     image: selenium/node-edge:4.34.0
@@ -56,4 +56,4 @@ services:
     volumes:
       - ./downloads:/home/seluser/Downloads
     deploy:
-      replicas: 2
+      replicas: 1
