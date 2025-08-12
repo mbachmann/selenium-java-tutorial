@@ -32,8 +32,8 @@ public class TestBase implements AfterTestExecutionCallback, HasLogger {
 
 	protected void setup(String url) {
 		// driver = DriverFactoryExtended.initDriver("chrome", "http://localhost:4444/wd/hub");
-		driver = DriverFactoryExtended.initDriver("firefox", "");
-		// driver = DriverFactoryExtended.initDriver();
+		// driver = DriverFactoryExtended.initDriver("firefox", "");
+		driver = DriverFactoryExtended.initDriver();
 		DOWNLOAD_DIR = DriverFactoryExtended.getDownloadDir();
 		robustGet(driver, url);
 		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
