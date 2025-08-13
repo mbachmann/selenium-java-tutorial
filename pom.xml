@@ -94,6 +94,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+			<version>2.0.17</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
 			<version>${awaitility.version}</version>
@@ -114,7 +120,7 @@
 					<threadCount>4</threadCount>
 					<!-- The other possibility for parallel test execution is setting the parameter forkCount to a value higher than 1. -->
 					<!-- As reuseForks=false creates a new JVM process for each test class, using parallel=classes would have no effect. -->
-					<!-- <forkCount>4</forkCount> -->
+					<forkCount>4</forkCount>
 					<!-- <reuseForks>true</reuseForks> -->
 					<!-- <reportsDirectory>target/surefire-reports-${surefire.forkNumber}</reportsDirectory> -->
 					<systemPropertyVariables>
