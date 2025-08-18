@@ -117,10 +117,10 @@
 					<!-- Parallel execution of test classes: methods, classes, suites, suitesAndClasses, suitesAndMethods, classesAndMethods or all. -->
 					<!-- https://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html -->
 					<parallel>classes</parallel>
-					<threadCount>4</threadCount>
+					<threadCount>1</threadCount>
 					<!-- The other possibility for parallel test execution is setting the parameter forkCount to a value higher than 1. -->
 					<!-- As reuseForks=false creates a new JVM process for each test class, using parallel=classes would have no effect. -->
-					<forkCount>4</forkCount>
+					<forkCount>1</forkCount>
 					<!-- <reuseForks>true</reuseForks> -->
 					<!-- <reportsDirectory>target/surefire-reports-${surefire.forkNumber}</reportsDirectory> -->
 					<systemPropertyVariables>
