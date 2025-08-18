@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
@@ -220,6 +221,8 @@ public class DriverFactoryExtended implements HasLogger {
 		getDriver().manage().timeouts().scriptTimeout(Duration.ofMinutes(2));
 		getDriver().manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
 
+		getDriver().manage().window().setSize(new Dimension(1920,1080));
+
 		try {
 			Dimension windowSize = getDriver().manage().window().getSize();
 			logger.info("Window size: {}x{}", windowSize.width, windowSize.height);
@@ -235,17 +238,15 @@ public class DriverFactoryExtended implements HasLogger {
 
 	private static ChromeOptions getChromeOptions() {
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--disable-gpu", "--no-sandbox", "--remote-allow-origins=*");
+		options.addArguments("--disable-gpu", "--no-sandbox", "--remote-allow-origins=*", "--disable-dev-shm-usage");
 		if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Linux) options.addArguments("--headless=new");
 		options.setCapability("goog:loggingPrefs", getLoggingPreferences());
 		options.addArguments("--safebrowsing-disable-download-protection");
 		options.addArguments("--safebrowsing-disable-extension-blacklist");
+		options.addArguments("--enable-logging=stderr", "--v=1");
 		options.setAcceptInsecureCerts(true);
 		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
-		String chromeUserDataDir = System.getProperty("SelChromeUserDataDir");
-		if (chromeUserDataDir != null) {
-			options.addArguments("--user-data-dir=" + chromeUserDataDir);
-		}
+		options.addArguments("--user-data-dir=" + getUserDataDir());
 		setChromeDownloadOptions(options);
 		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
 		return options;
@@ -258,6 +259,23 @@ public class DriverFactoryExtended implements HasLogger {
 		prefs.put("download.prompt_for_download", false);
 		prefs.put("safebrowsing.enabled", true);
 		chromeOptions.setExperimentalOption("prefs", prefs);
+	}
+
+	public static String getUserDataDir() {
+		try {
+			String userDataDir = System.getProperty("UserDataDir");
+			// Fallback: create a temp dir if not provided
+			if (userDataDir == null || userDataDir.isBlank()) {
+				userDataDir = Files.createTempDirectory("chrome-profile-").toString();
+			}
+			// Make sure it exists
+			Files.createDirectories(Path.of(userDataDir));
+			return userDataDir;
+
+		} catch (Exception e) {
+			logger.error("Error creating Chrome user data directory: {}", e.getMessage());
+			throw new RuntimeException("Could not create Chrome user data directory", e);
+		}
 	}
 
 	public static String getDownloadDir() {
@@ -299,13 +317,15 @@ public class DriverFactoryExtended implements HasLogger {
 		options.addPreference("pdfjs.disabled", true);
 		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
 		options.setAcceptInsecureCerts(true);
+		options.addArguments("--user-data-dir=" + getUserDataDir());
 		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		return options;
 	}
 
 	private static EdgeOptions getEdgeOptions() {
 		EdgeOptions options = new EdgeOptions();
-		options.addArguments("--disable-gpu", "--no-sandbox", "--remote-allow-origins=*");
+		options.addArguments("--disable-gpu", "--no-sandbox", "--remote-allow-origins=*", "--disable-dev-shm-usage");
+		if (OsCheck.getOperatingSystemType() == OsCheck.OSType.Linux) options.addArguments("--headless=new");
 		options.setCapability(EdgeOptions.LOGGING_PREFS, getLoggingPreferences());
 		Map<String, Object> prefs = new HashMap<>();
 		prefs.put("download.default_directory", getBrowserDownloadDir());
@@ -313,6 +333,7 @@ public class DriverFactoryExtended implements HasLogger {
 		prefs.put("download.directory_upgrade", true);
 		prefs.put("safebrowsing.enabled", true);
 		options.setAcceptInsecureCerts(true);
+		options.addArguments("--user-data-dir=" + getUserDataDir());
 		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
 		options.setExperimentalOption("prefs", prefs);
