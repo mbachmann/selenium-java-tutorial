@@ -249,6 +249,8 @@ public class DriverFactoryExtended implements HasLogger {
 		options.addArguments("--user-data-dir=" + getUserDataDir());
 		setChromeDownloadOptions(options);
 		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
+		String optionsString = getOptionsAsString(options);
+		logger.info(optionsString);
 		return options;
 	}
 
@@ -561,6 +563,14 @@ public class DriverFactoryExtended implements HasLogger {
 			return Optional.of(px);
 		}
 		return Optional.empty();
+	}
+
+	private static String getOptionsAsString(MutableCapabilities options) {
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, Object> entry : options.asMap().entrySet()) {
+			sb.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
+		}
+		return sb.toString().replaceAll(", $", "");
 	}
 
 }

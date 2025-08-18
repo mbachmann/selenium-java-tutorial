@@ -15,7 +15,7 @@
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<selenium.version>4.34.0</selenium.version>
+		<selenium.version>4.35.0</selenium.version>
 		<jupiter.version>5.13.4</jupiter.version>
 		<slf4j.version>2.0.9</slf4j.version>
 		<awaitility.version>4.2.0</awaitility.version>
