@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
@@ -40,6 +41,7 @@ public class DriverFactoryExtended implements HasLogger {
 
 	private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 	private static final ThreadLocal<DriverService> driverService = new ThreadLocal<>();
+	private static final ThreadLocal<Path> sessionProfileDir = new InheritableThreadLocal<>();
 
 	public static WebDriver getDriver() {
 		return driver.get();
@@ -246,11 +248,10 @@ public class DriverFactoryExtended implements HasLogger {
 		options.addArguments("--enable-logging=stderr", "--v=1");
 		options.setAcceptInsecureCerts(true);
 		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
-		options.addArguments("--user-data-dir=" + getUserDataDir());
+		options.addArguments("--user-data-dir=" + getUserDataDir("chrome"));
 		setChromeDownloadOptions(options);
 		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
-		String optionsString = getOptionsAsString(options);
-		logger.info(optionsString);
+		// logger.info(getOptionsAsString(options));
 		return options;
 	}
 
@@ -263,33 +264,37 @@ public class DriverFactoryExtended implements HasLogger {
 		chromeOptions.setExperimentalOption("prefs", prefs);
 	}
 
-	public static String getUserDataDir() {
+	public static String getUserDataDir(String browserName) {
 		try {
-			String userDataDir = System.getProperty("UserDataDir");
-			// Fallback: create a temp dir if not provided
-			if (userDataDir == null || userDataDir.isBlank()) {
-				userDataDir = Files.createTempDirectory("chrome-profile-").toString();
-			}
-			// Make sure it exists
-			Files.createDirectories(Path.of(userDataDir));
-			return userDataDir;
+			Path base =
+					Optional.ofNullable(System.getProperty("UserDataDir"))
+							.filter(s -> !s.isBlank())
+							.map(Paths::get)
+							.orElseGet(() -> {
+								Path shm = Paths.get("/dev/shm");
+								if (Files.isDirectory(shm) && Files.isWritable(shm)) return shm;
+								return Paths.get(System.getProperty("java.io.tmpdir"));
+							});
 
+			String buildTag   = Optional.ofNullable(System.getenv("BUILD_TAG")).orElse("local");
+			String execNum    = Optional.ofNullable(System.getenv("EXECUTOR_NUMBER")).orElse("0");
+			String threadId   = String.valueOf(Thread.currentThread().getId());
+			String unique     = UUID.randomUUID().toString();
+
+			Path dir = base.resolve("browser-profiles")
+					.resolve(String.format("%s-%s-%s-%s-%s",
+							browserName.toLowerCase(), buildTag, execNum, threadId, unique));
+
+			Files.createDirectories(dir);
+			sessionProfileDir.set(dir);
+			return dir.toString();
 		} catch (Exception e) {
-			logger.error("Error creating Chrome user data directory: {}", e.getMessage());
-			throw new RuntimeException("Could not create Chrome user data directory", e);
+			logger.error("Error creating {} user data directory: {}", browserName, e.getMessage(), e);
+			throw new RuntimeException("Could not create browser user data directory", e);
 		}
 	}
 
-	public static String getDownloadDir() {
-		String remoteUrl = System.getProperty("remoteUrl", "").trim();
-		if (!remoteUrl.isEmpty()) {
-			return "downloads"; // Default download directory for Selenium Grid in docker compose
-		} else {
-			return System.getProperty("user.home") + File.separator + "downloads";
-		}
-	}
-
-	private static String getBrowserDownloadDir() {
+	public static String getBrowserDownloadDir() {
 		String remoteUrl = System.getProperty("remoteUrl", "").trim();
 		if (!remoteUrl.isEmpty()) {
 			return "/home/seluser/Downloads"; // Default download directory for Selenium Grid in docker compose
@@ -319,7 +324,7 @@ public class DriverFactoryExtended implements HasLogger {
 		options.addPreference("pdfjs.disabled", true);
 		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
 		options.setAcceptInsecureCerts(true);
-		options.addArguments("--user-data-dir=" + getUserDataDir());
+		options.addArguments("--user-data-dir=" + getUserDataDir("firefox"));
 		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		return options;
 	}
@@ -335,7 +340,7 @@ public class DriverFactoryExtended implements HasLogger {
 		prefs.put("download.directory_upgrade", true);
 		prefs.put("safebrowsing.enabled", true);
 		options.setAcceptInsecureCerts(true);
-		options.addArguments("--user-data-dir=" + getUserDataDir());
+		options.addArguments("--user-data-dir=" + getUserDataDir("edge"));
 		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 		getProxyInformation().ifPresent(proxyInformation -> {options.setCapability("proxy", proxyInformation);});
 		options.setExperimentalOption("prefs", prefs);
@@ -456,9 +461,31 @@ public class DriverFactoryExtended implements HasLogger {
 		}
 	}
 
+	public static void cleanup() {
+
+	    Path dir = sessionProfileDir.get();
+		if (dir != null) {
+			try {
+				// delete recursively
+				Files.walk(dir)
+					.sorted(Comparator.reverseOrder())
+					.forEach(p -> {
+						try { Files.deleteIfExists(p); } catch (IOException ignore) {}
+					});
+			} catch (IOException ignore) {
+			// if deletion fails, rely on workspace cleanup
+			} finally {
+				sessionProfileDir.remove();
+			}
+		}
+
+	}
+
+
 	public static void quitDriverAndService() {
 		quitDriver();
 		quitService();
+		cleanup();
 	}
 
 	private static URL getRemoteUrl(String remoteUrl) {
