@@ -29,9 +29,13 @@ public class DriverFactoryExtended implements HasLogger {
 
 	private static final Logger logger = LoggerFactory.getLogger(DriverFactoryExtended.class);
 
-	private static final String CHROME_DRIVER = "src/test/resources/drivers/%s/chromedriver-138";
-	private static final String FIREFOX_DRIVER = "src/test/resources/drivers/%s/geckodriver";
-	private static final String EDGE_DRIVER = "src/test/resources/drivers/%s/msedgedriver-139";
+	private static final String PROJECT_CHROME_DRIVER = "src/test/resources/drivers/%s/chromedriver-138";
+	private static final String PROJECT_FIREFOX_DRIVER = "src/test/resources/drivers/%s/geckodriver";
+	private static final String PROJECT_EDGE_DRIVER = "src/test/resources/drivers/%s/msedgedriver-139";
+
+	private static final String LINUX_CHROME_DRIVER = "/usr/local/bin/chromedriver";
+	private static final String LINUX_FIREFOX_DRIVER = "/usr/local/bin/geckodriver";
+	private static final String LINUX_EDGE_DRIVER = "/usr/local/bin/msedgedriver";
 
 	private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 	private static final ThreadLocal<DriverService> driverService = new ThreadLocal<>();
@@ -335,12 +339,34 @@ public class DriverFactoryExtended implements HasLogger {
 	private static void setDriverProperty(String browser) {
 		OsCheck.OSType os = OsCheck.getOperatingSystemType();
 		String osFolder = OsCheck.getDriverFolder();
-		String path = switch (browser) {
-			case "chrome" -> String.format(CHROME_DRIVER, osFolder) + (os == OsCheck.OSType.Windows ? ".exe" : "");
-			case "firefox" -> String.format(FIREFOX_DRIVER, osFolder) + (os == OsCheck.OSType.Windows ? ".exe" : "");
-			case "edge" -> String.format(EDGE_DRIVER, osFolder) + (os == OsCheck.OSType.Windows ? ".exe" : "");
-			default -> throw new IllegalArgumentException("Unknown browser: " + browser);
-		};
+		String path = null;
+		if (os == OsCheck.OSType.Linux) {
+			path = switch (browser) {
+				case "chrome" -> LINUX_CHROME_DRIVER;
+				case "firefox" -> LINUX_FIREFOX_DRIVER;
+				case "edge" -> LINUX_EDGE_DRIVER;
+				default -> throw new IllegalArgumentException("Unknown browser: " + browser);
+			};
+		} else {
+			path = switch (browser) {
+				case "chrome" -> String.format(PROJECT_CHROME_DRIVER, osFolder) + (os == OsCheck.OSType.Windows ? ".exe" : "");
+				case "firefox" -> String.format(PROJECT_FIREFOX_DRIVER, osFolder) + (os == OsCheck.OSType.Windows ? ".exe" : "");
+				case "edge" -> String.format(PROJECT_EDGE_DRIVER, osFolder) + (os == OsCheck.OSType.Windows ? ".exe" : "");
+				default -> throw new IllegalArgumentException("Unknown browser: " + browser);
+			};
+		}
+		File driverFile = new File(path);
+		if (!driverFile.exists()) {
+			throw new IllegalStateException(
+					"WebDriver binary for " + browser + " not found at: " + driverFile.getAbsolutePath()
+			);
+		}
+
+		if (!driverFile.canExecute()) {
+			throw new IllegalStateException(
+					"WebDriver binary for " + browser + "  found but not executable at: " + driverFile.getAbsolutePath()
+			);
+		}
 		System.setProperty("webdriver." + browser + ".driver", path);
 		logger.debug("Set {} driver: {}", browser, path);
 	}
