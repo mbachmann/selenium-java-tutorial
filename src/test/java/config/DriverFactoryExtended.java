@@ -293,6 +293,15 @@ public class DriverFactoryExtended implements HasLogger {
 			throw new RuntimeException("Could not create browser user data directory", e);
 		}
 	}
+	public static String getDownloadDir() {
+		String remoteUrl = System.getProperty("remoteUrl", "").trim();
+		if (!remoteUrl.isEmpty()) {
+			return "downloads"; // Default download directory for Selenium Grid in docker compose
+		} else {
+			return System.getProperty("user.home") + File.separator + "downloads";
+		}
+	}
+
 
 	public static String getBrowserDownloadDir() {
 		String remoteUrl = System.getProperty("remoteUrl", "").trim();
